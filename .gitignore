@@ -1,0 +1,11 @@
+*.class
+
+#folders#
+/target
+
+# Packaged files #
+*.jar
+
+#IntelliJ specific
+.idea/
+*.iml
