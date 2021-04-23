@@ -1,15 +1,11 @@
 package it.canofari.pagopaexcercises.chartserver;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 import java.net.*;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
-
 
 /**
  * Tests for very simple chat server that listen on TCP port 10000 for clients.

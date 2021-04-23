@@ -5,9 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FlatArray {
-
-
-
+    
     // a nested array of Integer is an array of Objects
     public static Integer[] flattenIntegerArray(Object[] arrayToFlat) {
 
