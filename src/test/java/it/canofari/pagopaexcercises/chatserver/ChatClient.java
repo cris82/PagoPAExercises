@@ -27,7 +27,6 @@ public class ChatClient {
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
-
     }
 
     public void sendMessage(String msg) {
