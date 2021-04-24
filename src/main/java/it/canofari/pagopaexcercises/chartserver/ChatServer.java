@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Tests for very simple chat server that listen on TCP port 10000 for clients.
  */
 public class ChatServer {
-    private static List<AcceptTelnetClient> connectedClients = new CopyOnWriteArrayList<>();
+    private static List<AcceptTelnetClient> connectedClients = new CopyOnWriteArrayList<>(); //a thread-safe ArrayList
     static Integer counter = 0;  //number of total clients which have connected to the server
     private final int port = 10000;
     private ServerSocket socket;
@@ -25,13 +25,12 @@ public class ChatServer {
             if (!acceptTelnetClient.getClientId().equals(clientIdToSkip)) {
                 acceptTelnetClient.getOutputStream().println(message);
             }
-
         }
     }
+
+    // remove disconnected client
     static void removeDisconnectedClient(String clientId){
-
         connectedClients.removeIf(acceptTelnetClient -> acceptTelnetClient.getClientId().equals(clientId));
-
     }
 
     // start the server
