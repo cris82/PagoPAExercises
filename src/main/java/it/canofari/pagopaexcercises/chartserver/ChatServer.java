@@ -6,25 +6,32 @@ import java.net.*;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Tests for very simple chat server that listen on TCP port 10000 for clients.
  */
 public class ChatServer {
-    static ArrayList<AcceptTelnetClient> connectedClients = new ArrayList();
-    static int counter = 1;
+    private static List<AcceptTelnetClient> connectedClients = new CopyOnWriteArrayList<>();
+    static Integer counter = 0;  //number of total clients which have connected to the server
     private final int port = 10000;
     private ServerSocket socket;
 
     private static final Logger LOG = LoggerFactory.getLogger(ChatServer.class);
 
     // send a message to all connected clients except one (who wrote the message)
-    static public void sendMessageToAllClients(String message,String clientIdToSkip){
-        for(AcceptTelnetClient acceptTelnetClient:connectedClients){
-            if(!acceptTelnetClient.getClientId().equals(clientIdToSkip)) {
+    static void sendMessageToAllClients(String message,String clientIdToSkip){
+        for (AcceptTelnetClient acceptTelnetClient : connectedClients) {  //
+            if (!acceptTelnetClient.getClientId().equals(clientIdToSkip)) {
                 acceptTelnetClient.getOutputStream().println(message);
             }
+
         }
+    }
+    static void removeDisconnectedClient(String clientId){
+
+        connectedClients.removeIf(acceptTelnetClient -> acceptTelnetClient.getClientId().equals(clientId));
+
     }
 
     // start the server
@@ -34,9 +41,12 @@ public class ChatServer {
             LOG.info("Server started");
 
             while(true) {
-                Socket clientSocket = this.socket.accept();
                 // for each connected client and id is assigned in order to distinguish it from the others
-                String clientId = "Client" + counter++;
+                String clientId;
+                counter++;
+                   clientId = "Client" + counter;
+
+                Socket clientSocket = this.socket.accept();
 
                 // create a dedicated thread for the new connected client
                 new AcceptTelnetClient(clientId, clientSocket);
@@ -47,6 +57,9 @@ public class ChatServer {
         }
     }
 
+    public static List<AcceptTelnetClient> getConnectedClients(){
+        return connectedClients;
+    }
     public static void main(String[] args) {
         new ChatServer().start();
     }
@@ -76,18 +89,26 @@ class AcceptTelnetClient extends Thread
     public void run(){
 
         try {
-            ChatServer.connectedClients.add(this);
+            ChatServer.getConnectedClients().add(this);
+            LOG.debug(this.clientId+ " connected");
             boolean alive=true;
             while(alive){
                 String line = this.inputStream.readLine(); //receive a message from a client
                 String message;
                 if(Objects.isNull(line)){ // when a client disconnects a null message is sent
+                    message=this.clientId+ " disconnected";
                     alive= false;
-                }
-                else {
-                    message = clientId + "> " + line;
+                    ChatServer.removeDisconnectedClient(this.clientId);
+                    this.socket.close();
+                    // close the i/o streams
+                    this.inputStream.close();
+                    this.outputStream.close();
                     LOG.debug (message);
+                }
+                else if(!line.trim().isEmpty()){
+                    message = clientId + "> " + line;
                     ChatServer.sendMessageToAllClients(message, this.clientId);
+                    LOG.debug (message);
                 }
 
 
