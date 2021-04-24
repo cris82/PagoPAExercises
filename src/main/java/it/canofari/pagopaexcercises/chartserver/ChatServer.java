@@ -89,7 +89,7 @@ class AcceptTelnetClient extends Thread
 
         try {
             ChatServer.getConnectedClients().add(this);
-            LOG.debug(this.clientId+ " connected");
+            LOG.info(this.clientId+ " connected");
             boolean alive=true;
             while(alive){
                 String line = this.inputStream.readLine(); //receive a message from a client
@@ -102,15 +102,13 @@ class AcceptTelnetClient extends Thread
                     // close the i/o streams
                     this.inputStream.close();
                     this.outputStream.close();
-                    LOG.debug (message);
+                    LOG.info (message);
                 }
                 else if(!line.trim().isEmpty()){
                     message = clientId + "> " + line;
                     ChatServer.sendMessageToAllClients(message, this.clientId);
                     LOG.debug (message);
                 }
-
-
             }
         }catch (IOException e){
             LOG.debug(e.getMessage());
